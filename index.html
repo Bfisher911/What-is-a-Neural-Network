@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What is a Neural Network? An Interactive Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .neuron {
+            transition: all 0.3s ease-in-out;
+        }
+        .synapse {
+            transition: all 0.3s ease-in-out;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw-line 2s forwards;
+        }
+        .fade-in {
+            opacity: 0;
+            animation: fade-in-anim 1s forwards;
+        }
+        @keyframes draw-line {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        @keyframes fade-in-anim {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .section-card {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .section-card.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 50;
+            justify-content: center;
+            align-items: center;
+        }
+        .popup-content {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.3s ease-out;
+        }
+        .popup-overlay.flex .popup-content {
+           opacity: 1;
+           transform: scale(1);
+        }
+        .tooltip {
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1f2937;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+        .has-tooltip:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+
+    <!-- Header -->
+    <header class="text-center p-8 md:p-12 bg-gradient-to-b from-gray-800 to-gray-900">
+        <h1 class="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 mb-4 fade-in">What is a Neural Network?</h1>
+        <p class="max-w-3xl mx-auto text-lg md:text-xl text-gray-300 fade-in" style="animation-delay: 0.2s;">An interactive guide for everyone. No experience required!</p>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 space-y-24">
+        
+        <!-- Section 1: The Brain Analogy -->
+        <section id="analogy" class="section-card flex flex-col md:flex-row items-center gap-8">
+            <div class="md:w-1/2 text-center md:text-left">
+                <h2 class="text-3xl font-bold mb-4 text-purple-300">It's Inspired by the Brain</h2>
+                <p class="text-gray-300 text-lg mb-4">Imagine a neural network as a simplified version of our brain. It's made of digital "neurons" that connect and work together to learn, recognize patterns, and make decisions.</p>
+                <p class="text-gray-400">Just like we learn from experience, these networks learn from data.</p>
+            </div>
+            <div class="md:w-1/2 flex items-center justify-center p-8">
+                <!-- Brain Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-full h-auto max-w-xs mx-auto text-purple-400 drop-shadow-[0_5px_15px_rgba(192,132,252,0.3)]" alt="Stylized illustration of a brain">
+                    <path d="M12 2a4.5 4.5 0 0 0-4.5 4.5v.143a4.5 4.5 0 0 0-2.19 1.558 4.5 4.5 0 0 0-1.467 4.144c.484 2.29 2.096 4.143 4.157 4.156a4.5 4.5 0 0 0 4.143-1.467 4.5 4.5 0 0 0 .14-6.426V6.5A4.5 4.5 0 0 0 12 2Z"/>
+                    <path d="M12 2a4.5 4.5 0 0 1 4.5 4.5v.143a4.5 4.5 0 0 1 2.19 1.558 4.5 4.5 0 0 1 1.467 4.144c-.484 2.29-2.096 4.143-4.157 4.156a4.5 4.5 0 0 1-4.143-1.467 4.5 4.5 0 0 1-.14-6.426V6.5A4.5 4.5 0 0 1 12 2Z"/>
+                    <path d="M12 15a4.5 4.5 0 0 0-4.5 4.5v0a4.5 4.5 0 0 0 4.5 4.5h0a4.5 4.5 0 0 0 4.5-4.5v0a4.5 4.5 0 0 0-4.5-4.5Z"/>
+                    <path d="M2.5 12a4.5 4.5 0 0 0-1 3.5 4.5 4.5 0 0 0 4.5 4.5h.4a4.5 4.5 0 0 0 4.1-3.1"/>
+                    <path d="M21.5 12a4.5 4.5 0 0 1 1 3.5 4.5 4.5 0 0 1-4.5 4.5h-.4a4.5 4.5 0 0 1-4.1-3.1"/>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Section 2: Building Blocks -->
+        <section id="neurons" class="section-card text-center">
+            <h2 class="text-3xl font-bold mb-2 text-cyan-300">The Building Block: A Single Neuron</h2>
+            <p class="max-w-2xl mx-auto text-gray-300 text-lg mb-12">Each neuron is a tiny decision-maker. It takes in some information, thinks about it, and passes a signal on.</p>
+            <div class="flex justify-center items-center space-x-4 md:space-x-8 p-6 bg-gray-800/50 rounded-xl">
+                <!-- Inputs -->
+                <div class="text-center has-tooltip relative">
+                     <div class="w-16 h-16 md:w-20 md:h-20 bg-green-500 rounded-full flex items-center justify-center text-sm md:text-base font-bold text-gray-900">Input 1</div>
+                     <span class="tooltip">Information goes in here</span>
+                </div>
+                <div class="text-center has-tooltip relative">
+                     <div class="w-16 h-16 md:w-20 md:h-20 bg-green-500 rounded-full flex items-center justify-center text-sm md:text-base font-bold text-gray-900">Input 2</div>
+                     <span class="tooltip">It can have many inputs!</span>
+                </div>
+
+                <!-- Arrow -->
+                <svg class="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+
+                <!-- Neuron -->
+                <div class="text-center has-tooltip relative">
+                    <div class="w-24 h-24 md:w-32 md:h-32 bg-purple-500 rounded-full flex items-center justify-center font-bold text-lg md:text-xl text-white shadow-lg shadow-purple-500/30">Neuron</div>
+                    <span class="tooltip">Processes the info</span>
+                </div>
+
+                <!-- Arrow -->
+                <svg class="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                
+                <!-- Output -->
+                <div class="text-center has-tooltip relative">
+                    <div class="w-20 h-20 md:w-24 md:h-24 bg-cyan-400 rounded-full flex items-center justify-center text-sm md:text-base font-bold text-gray-900">Output</div>
+                    <span class="tooltip">A decision comes out</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Interactive Demo -->
+        <section id="interactive" class="section-card">
+            <h2 class="text-3xl font-bold mb-2 text-center text-purple-300">How it "Learns": Weights & Biases</h2>
+            <p class="max-w-3xl mx-auto text-gray-300 text-lg mb-8 text-center">A network learns by changing the <strong class="text-green-400 has-tooltip relative">strength<span class="tooltip">This is the "weight". A higher weight means the input is more important.</span></strong> of connections and its own internal <strong class="text-cyan-400 has-tooltip relative">tendency<span class="tooltip">This is the "bias". It's like a starting mood or assumption.</span></strong>. Let's try it!</p>
+            
+            <div class="bg-gray-800/50 rounded-xl p-6 md:p-8">
+                <h3 class="text-2xl font-semibold text-center mb-6">Scenario: Should I take an umbrella? ☂️</h3>
+                <div class="flex flex-col md:flex-row items-center justify-around gap-8">
+                    <!-- Inputs -->
+                    <div class="flex flex-col gap-6">
+                        <h4 class="text-xl font-semibold text-center text-gray-200">Inputs</h4>
+                        <button id="input-cloudy" class="w-48 p-4 rounded-lg text-lg font-semibold transition-all duration-300 bg-gray-600 hover:bg-gray-500">Is it cloudy?</button>
+                        <button id="input-forecast" class="w-48 p-4 rounded-lg text-lg font-semibold transition-all duration-300 bg-gray-600 hover:bg-gray-500">Forecast says rain?</button>
+                    </div>
+
+                    <!-- Network Viz -->
+                    <div class="relative w-full md:w-auto flex justify-center items-center">
+                        <svg id="network-svg" class="w-64 h-64 md:w-80 md:h-80" viewBox="0 0 200 200">
+                           <!-- Synapses -->
+                           <line id="synapse1" x1="25" y1="50" x2="100" y2="100" stroke="#4ade80" stroke-width="2" class="synapse" />
+                           <line id="synapse2" x1="25" y1="150" x2="100" y2="100" stroke="#4ade80" stroke-width="2" class="synapse" style="animation-delay: 0.3s"/>
+                           <line id="synapse3" x1="100" y1="100" x2="175" y2="100" stroke="#67e8f9" stroke-width="4" class="synapse" style="animation-delay: 0.6s"/>
+
+                           <!-- Neurons -->
+                           <circle id="neuron-cloudy" cx="25" cy="50" r="15" fill="#475569" class="neuron" />
+                           <circle id="neuron-forecast" cx="25" cy="150" r="15" fill="#475569" class="neuron" />
+                           <circle id="neuron-hidden" cx="100" cy="100" r="25" fill="#a855f7" class="neuron" />
+                           <circle id="neuron-output" cx="175" cy="100" r="20" fill="#6b7280" class="neuron" />
+                        </svg>
+                    </div>
+
+                    <!-- Controls & Output -->
+                    <div class="flex flex-col gap-6 w-full md:w-auto">
+                        <h4 class="text-xl font-semibold text-center text-gray-200">Controls</h4>
+                        <!-- Weight 1 -->
+                        <div class="w-48">
+                            <label for="weight1" class="block mb-1 text-sm font-medium">Importance of "Cloudy"</label>
+                            <input id="weight1" type="range" min="0" max="1" step="0.1" value="0.5" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <!-- Weight 2 -->
+                        <div class="w-48">
+                           <label for="weight2" class="block mb-1 text-sm font-medium">Importance of "Forecast"</label>
+                           <input id="weight2" type="range" min="0" max="1" step="0.1" value="0.5" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                         <!-- Bias -->
+                        <div class="w-48">
+                           <label for="bias" class="block mb-1 text-sm font-medium has-tooltip relative">Personal Bias <span class="tooltip">Negative bias means you hate carrying umbrellas!</span></label>
+                           <input id="bias" type="range" min="-0.5" max="0.5" step="0.1" value="0" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div id="output-decision" class="w-48 p-4 rounded-lg text-lg font-bold text-center transition-all duration-300 bg-gray-700 text-white">
+                            Thinking...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: The Black Box -->
+        <section id="blackbox" class="section-card text-center">
+            <h2 class="text-3xl font-bold mb-2 text-cyan-300">The "Black Box" Problem</h2>
+            <p class="max-w-2xl mx-auto text-gray-300 text-lg mb-8">When networks have millions of neurons, it's hard to know *exactly* why they make a specific decision. It's not magic, just very complex!</p>
+            <div class="relative max-w-lg mx-auto">
+                <div class="absolute inset-0 bg-gradient-to-tr from-purple-600 to-cyan-500 rounded-xl blur-2xl opacity-30"></div>
+                <div class="relative bg-gray-800 p-8 rounded-xl flex items-center justify-between shadow-lg">
+                    <span class="text-2xl">🔍</span>
+                    <p class="text-lg font-semibold">"Why did you decide that?"</p>
+                    <div class="w-24 h-24 bg-gray-900 rounded-lg flex items-center justify-center">
+                        <span class="text-4xl animate-pulse">?</span>
+                    </div>
+                </div>
+            </div>
+             <button onclick="openPopup('blackbox-popup')" class="mt-8 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                Tell me more
+            </button>
+        </section>
+
+        <!-- Section 5: Real World -->
+        <section id="realworld" class="section-card text-center">
+            <h2 class="text-3xl font-bold mb-8 text-purple-300">Where are Neural Networks Used?</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+                <div class="bg-gray-800 p-6 rounded-lg text-center hover:bg-gray-700 transition-colors">
+                    <div class="text-4xl mb-3">🖼️</div>
+                    <h3 class="font-semibold">Image Recognition</h3>
+                    <p class="text-sm text-gray-400">Tagging friends in photos</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg text-center hover:bg-gray-700 transition-colors">
+                    <div class="text-4xl mb-3">🗣️</div>
+                    <h3 class="font-semibold">Speech to Text</h3>
+                    <p class="text-sm text-gray-400">Talking to your phone assistant</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg text-center hover:bg-gray-700 transition-colors">
+                    <div class="text-4xl mb-3">🌍</div>
+                    <h3 class="font-semibold">Language Translation</h3>
+                     <p class="text-sm text-gray-400">Translating websites instantly</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg text-center hover:bg-gray-700 transition-colors">
+                    <div class="text-4xl mb-3">🚗</div>
+                    <h3 class="font-semibold">Self-Driving Cars</h3>
+                     <p class="text-sm text-gray-400">Helping cars see the road</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Pop-up Modals -->
+    <div id="blackbox-popup" class="popup-overlay">
+        <div class="popup-content bg-gray-800 rounded-lg p-8 max-w-lg w-full relative shadow-2xl">
+            <button onclick="closePopup('blackbox-popup')" class="absolute top-4 right-4 text-gray-400 hover:text-white">&times;</button>
+            <h3 class="text-2xl font-bold mb-4 text-cyan-300">Unpacking the Black Box</h3>
+            <p class="text-gray-300 mb-4">Imagine asking a master chef for their recipe. They might not be able to list every single grain of salt or the exact temperature at every second. They just "know" it works through years of experience.</p>
+            <p class="text-gray-300">Similarly, a large neural network has adjusted millions of tiny "weights" and "biases". The final result works, but tracing the path of a single decision through that maze is incredibly difficult for humans. Researchers are actively working on ways to make these models more interpretable!</p>
+        </div>
+    </div>
+
+
+    <footer class="text-center p-8 mt-16 border-t border-gray-800">
+        <p class="text-gray-500">An interactive explanation by Gemini.</p>
+    </footer>
+
+    <script>
+        // --- Intersection Observer for fade-in animations ---
+        const sections = document.querySelectorAll('.section-card');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    // Optional: unobserve after it's visible so it doesn't re-animate
+                    // observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            rootMargin: '0px',
+            threshold: 0.15
+        });
+
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+
+        // --- Interactive Demo Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputCloudyBtn = document.getElementById('input-cloudy');
+            const inputForecastBtn = document.getElementById('input-forecast');
+            const weight1Slider = document.getElementById('weight1');
+            const weight2Slider = document.getElementById('weight2');
+            const biasSlider = document.getElementById('bias');
+            const outputDecision = document.getElementById('output-decision');
+
+            const neuronCloudy = document.getElementById('neuron-cloudy');
+            const neuronForecast = document.getElementById('neuron-forecast');
+            const neuronHidden = document.getElementById('neuron-hidden');
+            const neuronOutput = document.getElementById('neuron-output');
+            
+            const synapse1 = document.getElementById('synapse1');
+            const synapse2 = document.getElementById('synapse2');
+
+            let inputCloudy = 0; // 0 for No, 1 for Yes
+            let inputForecast = 0; // 0 for No, 1 for Yes
+
+            function toggleInput(btn, inputVar) {
+                if (btn.classList.contains('bg-green-500')) {
+                    btn.classList.remove('bg-green-500', 'text-gray-900');
+                    btn.classList.add('bg-gray-600');
+                    return 0;
+                } else {
+                    btn.classList.remove('bg-gray-600');
+                    btn.classList.add('bg-green-500', 'text-gray-900');
+                    return 1;
+                }
+            }
+
+            inputCloudyBtn.addEventListener('click', () => {
+                inputCloudy = toggleInput(inputCloudyBtn, inputCloudy);
+                updateDecision();
+            });
+
+            inputForecastBtn.addEventListener('click', () => {
+                inputForecast = toggleInput(inputForecastBtn, inputCloudy);
+                updateDecision();
+            });
+
+            weight1Slider.addEventListener('input', updateDecision);
+            weight2Slider.addEventListener('input', updateDecision);
+            biasSlider.addEventListener('input', updateDecision);
+
+            function updateDecision() {
+                const weight1 = parseFloat(weight1Slider.value);
+                const weight2 = parseFloat(weight2Slider.value);
+                const bias = parseFloat(biasSlider.value);
+                
+                // --- Visual Feedback for inputs ---
+                neuronCloudy.style.fill = inputCloudy ? '#22c55e' : '#475569';
+                neuronForecast.style.fill = inputForecast ? '#22c55e' : '#475569';
+
+                // --- Visual Feedback for weights ---
+                synapse1.style.strokeWidth = 1 + (weight1 * 5);
+                synapse2.style.strokeWidth = 1 + (weight2 * 5);
+
+                // --- The "Neural Network" Calculation ---
+                // A simplified model: (input1 * weight1) + (input2 * weight2) + bias
+                const sum = (inputCloudy * weight1) + (inputForecast * weight2) + bias;
+                
+                // An "activation function" - decides if the neuron fires
+                const activationThreshold = 0.7;
+                
+                // Update hidden neuron color based on sum (pre-activation)
+                const hiddenActivation = Math.min(1, Math.max(0, sum / 2)); // Normalize for color
+                const purpleShade = Math.round(300 + hiddenActivation * 300);
+                neuronHidden.style.fill = `rgb(${purpleShade-200}, 85, 247)`;
+                
+                if (sum > activationThreshold) {
+                    outputDecision.textContent = 'Take Umbrella! ☂️';
+                    outputDecision.classList.remove('bg-gray-700');
+                    outputDecision.classList.add('bg-cyan-500');
+                    neuronOutput.style.fill = '#22d3ee';
+                } else {
+                    outputDecision.textContent = 'Leave it. 😎';
+                    outputDecision.classList.remove('bg-cyan-500');
+                    outputDecision.classList.add('bg-gray-700');
+                    neuronOutput.style.fill = '#6b7280';
+                }
+            }
+
+            // Initial call
+            updateDecision();
+        });
+
+        // --- Popup Logic ---
+        function openPopup(id) {
+            const popup = document.getElementById(id);
+            if (popup) {
+                popup.style.display = 'flex';
+                // Trigger transition
+                setTimeout(() => popup.classList.add('flex'), 10);
+            }
+        }
+
+        function closePopup(id) {
+            const popup = document.getElementById(id);
+            if (popup) {
+                popup.classList.remove('flex');
+                // Wait for transition to finish before hiding
+                setTimeout(() => {
+                   popup.style.display = 'none'; 
+                }, 300);
+            }
+        }
+    </script>
+</body>
+</html>
